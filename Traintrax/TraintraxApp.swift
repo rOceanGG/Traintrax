@@ -11,7 +11,7 @@ import SwiftUI
 struct TraintraxApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DelayListView()
         }
     }
 }

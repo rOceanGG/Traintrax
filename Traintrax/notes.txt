@@ -1,0 +1,13 @@
+APIS
+
+For most tube lines:
+https://api.tfl.gov.uk/Line/LINEID/Status
+
+For DLR:
+https://api.tfl.gov.uk/Line/Mode/dlr/Status
+
+For Elizabeth:
+https://api.tfl.gov.uk/Line/Mode/elizabeth-line/Status
+
+For Overground:
+https://api.tfl.gov.uk/Line/Mode/overground/Status
