@@ -58,8 +58,8 @@ struct DelayListView: View {
         NavigationView {
             List(Array(zip(lines.indices, lines)), id: \.1) { index, line in
                 VStack(spacing: 0) {
-                    NavigationLink(destination: LineDelaysView(line: lineIDs[index], viewModel: viewModel)) {
-                        Text("\(line) Line")
+                    NavigationLink(destination: LineDelaysView(lineID: lineIDs[index], lineName: lines[index], viewModel: viewModel)) {
+                        Text("\(lines[index]) Line")
                             .font(.headline)
                             .foregroundColor(lineColours[index])
                             .padding(.vertical, 8)
@@ -76,24 +76,48 @@ struct DelayListView: View {
 }
 // New view to show delays for a specific line
 struct LineDelaysView: View {
-    let line: String
+    let lineID: String
+    let lineName: String
     @ObservedObject var viewModel: DelayViewModel
-
+    
     var body: some View {
-        List(viewModel.allDelays.filter { $0.lineId == line }) { delay in
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(delay.statusSeverityDescription): \(delay.reason?.isEmpty == false ? delay.reason! : (delay.disruption?.description ?? "No details"))")
-                if let disruption = delay.disruption, let info = disruption.additionalInfo, !info.isEmpty {
-                    Text(info)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
+        let delays = viewModel.allDelays.filter { $0.lineId == lineID }
+        Group {
+            if delays.isEmpty {
+                AnyView(
+                    VStack(spacing: 16) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .resizable()
+                            .frame(width: 60, height: 60)
+                            .foregroundColor(.green)
+                        Text("No disruptions on this line!")
+                            .font(.title2)
+                            .foregroundColor(.green)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(.systemBackground))
+                )
+            } else {
+                AnyView(
+                    List(delays) { delay in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("\(delay.statusSeverityDescription)")
+                            if let dreason = delay.reason {
+                                let sep = dreason.split(separator: ":")
+                                let actual = sep.count > 1 ? String(sep[1].dropFirst()) : dreason
+                                Text(actual)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                )
             }
-            .padding(.vertical, 4)
         }
-        .navigationTitle("\(line.capitalized) Delays")
+        .navigationTitle("\(lineName) Delays")
         .onAppear {
-            viewModel.fetchDelays(for: line)
+            viewModel.fetchDelays(for: lineID)
         }
     }
 }
